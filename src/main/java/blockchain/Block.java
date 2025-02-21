@@ -18,11 +18,10 @@ public class Block {
         generateHash();
     }
 
-
     /**
      * Generates the SHA-256 hash for the current block using its previous hash,
      * timestamp, and nonce.
-     * <p>
+     * 
      * The resulting hash is stored in the {@code hash} field.
      */
 
@@ -33,7 +32,7 @@ public class Block {
 
     /**
      * Generates the SHA-256 hash for the block using the given nonce.
-     * <p>
+     *
      * @param nonce The nonce value to use for generating the hash.
      * @return A hexadecimal string representing the block's hash.
      * @see #generateHash()
@@ -46,7 +45,8 @@ public class Block {
     /**
      * Computes the SHA-256 hash for the provided data.
      *
-     * @param dataToHash The concatenated string containing the block's previous hash, timestamp, and nonce.
+     * @param dataToHash The concatenated string containing the block's previous
+     *                   hash, timestamp, and nonce.
      * @return A hexadecimal string representing the computed SHA-256 hash.
      */
     private String computeHash(String dataToHash) {
@@ -64,7 +64,6 @@ public class Block {
 
         return hexString.toString();
     }
-
 
     // getters and setters
 
@@ -115,5 +114,9 @@ public class Block {
                 "\nTime:" + this.timeStamp +
                 "\nNonce:" + this.nonce +
                 "\n" + this.transactions + "\n";
+    }
+
+    public void incrementNonce() {
+        this.nonce++;
     }
 }
