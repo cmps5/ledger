@@ -21,6 +21,18 @@ public class Blockchain {
         return chain.get(chain.size() - 1);
     }
 
+    public ArrayList<Block> getBlockchain (){
+        return this.chain;
+    }
+
+    public long getChainSize(){
+        return this.chain.size();
+    }
+
+    public void addBlock(Block block) {
+        this.chain.add(block);
+    }
+
     public String getLastBlockHash(List<Block> chain) {
         if (chain.isEmpty()) {
             return GENESIS_PREV_HASH;
@@ -37,7 +49,7 @@ public class Blockchain {
 
         Block minedBlock = mine(block);
         if (validateBlock(minedBlock)) {
-            this.chain.add(minedBlock);
+            addBlock(minedBlock);
             return true;
         }
         return false;

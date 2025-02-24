@@ -14,6 +14,19 @@ public class BlockchainTest {
     }
 
     @Test
+    public void testAddBlock() {
+        Block block = new Block("Block");
+        assertTrue(blockchain.addBlockPOW(block));
+        assertEquals(1,blockchain.getChainSize());
+        assertEquals(Blockchain.GENESIS_PREV_HASH, block.getPreviousHash());
+
+        Block block1 = new Block(null);
+        blockchain.addBlockPOW(block1);
+        assertEquals(2, blockchain.getChainSize());
+        assertEquals(block.getHash(), block1.getPreviousHash());
+    }
+
+    @Test
     public void testBlockValidation() {
         Block block = new Block("Block");
         blockchain.addBlockPOW(block);
@@ -27,6 +40,6 @@ public class BlockchainTest {
         blockchain.mine(block);
 
         String prefix = "0"; // DIFFICULTY = 1
-        assertTrue("Block hash should meet the difficulty requirement.", block.getHash().startsWith(prefix));
+        assertTrue(block.getHash().startsWith(prefix));
     }
 }
