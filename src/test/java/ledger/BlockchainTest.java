@@ -31,7 +31,7 @@ public class BlockchainTest {
         Block block = new Block("Block");
         blockchain.addBlockPOW(block);
 
-        assertTrue(blockchain.validateBlock(block));
+        assertEquals(true, blockchain.validateBlock(block));
     }
 
     @Test
