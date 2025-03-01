@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 public class Block {
-    private Transaction transactions = null;
+    private Transaction transaction = null;
     private String hash;
     private String previousHash;
     private int nonce;
@@ -68,11 +68,11 @@ public class Block {
     // getters and setters
 
     public Transaction getTransactions() {
-        return transactions;
+        return transaction;
     }
 
     public void setTransactions(Transaction transactions) {
-        this.transactions = transactions;
+        this.transaction = transactions;
     }
 
     public String getHash() {
@@ -113,7 +113,7 @@ public class Block {
                 "\nPrevHash:" + this.previousHash +
                 "\nTime:" + this.timeStamp +
                 "\nNonce:" + this.nonce +
-                "\n" + this.transactions + "\n";
+                "\n" + this.transaction + "\n";
     }
 
     public void incrementNonce() {
