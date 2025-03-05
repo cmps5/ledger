@@ -40,7 +40,6 @@ public class Kademlia {
         if (instance == null) {
             instance = new Kademlia();
         }
-
         return instance;
     }
 

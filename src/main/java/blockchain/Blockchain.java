@@ -8,10 +8,18 @@ public class Blockchain {
     public static final String GENESIS_PREV_HASH = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     private static final int DIFFICULTY = 1;
 
+    private static Blockchain instance;
     private ArrayList<Block> chain;
 
     public Blockchain() {
         chain = new ArrayList<>();
+    }
+
+    public static Blockchain getInstance() {
+        if (instance == null) {
+            instance = new Blockchain();
+        }
+        return instance;
     }
 
     public Block getLastBlock() {

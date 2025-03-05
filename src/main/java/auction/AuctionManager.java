@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 
 public class AuctionManager {
+    private static AuctionManager instance;
     private final HashMap<String, Auction> auctions;
     private final Blockchain blockchain;
     private HashMap<String, Auction> allAuctions;
@@ -16,11 +17,20 @@ public class AuctionManager {
         this.blockchain = new Blockchain();
     }
 
+    public static AuctionManager getInstance() {
+        if (instance == null) {
+            instance = new AuctionManager();
+        }
+        return instance;
+    }
+
 
     public void createNewAuction(String name, int basePrice) {
         Auction auction = new Auction(name, basePrice);
         // @ TODO
     }
+
+
 
 
 }
