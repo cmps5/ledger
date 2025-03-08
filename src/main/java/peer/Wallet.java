@@ -1,9 +1,6 @@
 package peer;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 
 public class Wallet {
     private static Wallet instance;
@@ -28,6 +25,9 @@ public class Wallet {
     }
 
 
+    /**
+     * Generate an RSA key pair with a key size of 2048 bits // 2048 bits for security and performance
+     */
     private KeyPair generateKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
         keyPairGen.initialize(2048);
@@ -40,6 +40,10 @@ public class Wallet {
 
     public PublicKey getPubKey() {
         return keyPair.getPublic();
+    }
+
+    public PrivateKey getPrivKey() {
+        return keyPair.getPrivate();
     }
 
     public String getID() {

@@ -3,16 +3,20 @@ package kademlia;
 import auction.AuctionManager;
 import blockchain.Blockchain;
 import io.grpc.stub.StreamObserver;
+import peer.Wallet;
 
 public class KademliaService extends KademliaGrpc.KademliaImplBase {
 
     Kademlia kademlia;
     Blockchain blockChain;
     AuctionManager auctionApp;
+    Wallet wallet;
 
     public KademliaService(Kademlia kademlia) {
         this.kademlia = kademlia;
-        // @ TODO
+        this.wallet = Wallet.getInstance();
+        this.blockChain = Blockchain.getInstance();
+        this.auctionApp = AuctionManager.getInstance();
     }
 
     @Override

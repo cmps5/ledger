@@ -5,6 +5,7 @@ import com.google.common.math.BigIntegerMath;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import peer.Wallet;
 
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -18,6 +19,7 @@ public class Kademlia {
     public static final int DIFFICULTY = 1;
     public static Kademlia instance;
     private static KBucket kBucket;
+    private static Wallet wallet;
 
     // Number max of elements in kbucket
     private final int k = 20;
@@ -27,13 +29,12 @@ public class Kademlia {
     private String IP;
     private String ID;
     private String port;
-    private String bootstrapPort = "9090";
-
+    private String bootstrapPort = "8000";
     private String bootstrapIp = "localhost";
     private boolean insideNetwork;
 
     public Kademlia() {
-        // @ TODO
+        this.wallet = Wallet.getInstance();
     }
 
     public static Kademlia getInstance() {
@@ -197,7 +198,7 @@ public class Kademlia {
                 return;
             }
 
-            // utils.setID(ID); @TODO
+            wallet.setID(ID);
 
             this.insideNetwork = true;
             kBucket = new KBucket(new Node(IP, port, ID));
@@ -208,7 +209,7 @@ public class Kademlia {
             kBucket = new KBucket(new Node(IP, port, bootstrapId));
 
             ID = bootstrapId;
-            // utils.setID(bootstrapId); @TODO
+            wallet.setID(bootstrapId);
         }
     }
 

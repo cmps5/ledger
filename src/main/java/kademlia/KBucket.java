@@ -36,7 +36,7 @@ public class KBucket {
         }
 
         for (int i = 1; alphaValues > 0 && (distance - i >= 0 || distance + i < 160); i++) {
-            if (distance - i >= 0 && kbucket[distance - i].size() != 0) {
+            if (distance - i >= 0 && !kbucket[distance - i].isEmpty()) {
                 for (int x = 0; x < kbucket[distance - i].size() && alphaValues > 0; x++) {
                     closestNodes.add((Node) kbucket[distance - i].get(x));
                     alphaValues--;
@@ -45,7 +45,7 @@ public class KBucket {
             if (alphaValues == 0)
                 break;
 
-            if (distance + i < 160 && kbucket[distance + i].size() != 0) {
+            if (distance + i < 160 && !kbucket[distance + i].isEmpty()) {
                 for (int x = 0; x < kbucket[distance + i].size() && alphaValues > 0; x++) {
                     closestNodes.add((Node) kbucket[distance + i].get(x));
                     alphaValues--;
