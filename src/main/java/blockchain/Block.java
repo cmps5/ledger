@@ -67,12 +67,12 @@ public class Block {
 
     // getters and setters
 
-    public Transaction getTransactions() {
+    public Transaction getTransaction() {
         return transaction;
     }
 
-    public void setTransactions(Transaction transactions) {
-        this.transaction = transactions;
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
     }
 
     public String getHash() {
