@@ -13,29 +13,29 @@ public class BootStrap {
 
     String IP;
     int port;
-    String portString;
-
 
     public BootStrap() {
         this.IP = "localhost";
-        this.port = 9090;
-        this.portString = "9090";
+        this.port = 8000;
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     public static void main(String[] args) {
 
         BootStrap peer = new BootStrap();
 
+        Wallet wallet = Wallet.getInstance();
+        wallet.setIP(peer.IP);
+        wallet.setPort(Integer.toString(peer.port));
 
-        try {
-            sleep(600);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
 
+        Kademlia kademlia = Kademlia.getInstance();
+        kademlia.setIP(peer.IP);
+        kademlia.setPort(Integer.toString(peer.port));
 
         new Thread(() -> {
-            Server server = ServerBuilder.forPort(peer.port)
+            Server server;
+            server = ServerBuilder.forPort(peer.port)
                     .addService(new KademliaService(Kademlia.getInstance()))
                     .build();
 

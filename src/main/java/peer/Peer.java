@@ -18,15 +18,18 @@ public class Peer {
         this.port = Integer.parseInt(port);
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     public static void main(String[] args) {
 
         Peer peer = new Peer(args[0], args[1]);
 
-        try {
-            sleep(300);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        Wallet wallet = Wallet.getInstance();
+        wallet.setIP(peer.IP);
+        wallet.setPort(Integer.toString(peer.port));
+
+        Kademlia kademlia = Kademlia.getInstance();
+        kademlia.setIP(peer.IP);
+        kademlia.setPort(Integer.toString(peer.port));
 
         new Thread(() -> {
             Server server = ServerBuilder.forPort(peer.port)
