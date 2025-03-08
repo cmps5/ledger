@@ -31,6 +31,11 @@ public class AuctionManager {
     }
 
 
+    public void printAuctions() {
+        // @TODO
+    }
 
-
+    public void publishBid(String topic, int i) {
+        // @TODO
+    }
 }

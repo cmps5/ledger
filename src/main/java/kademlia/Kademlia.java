@@ -47,6 +47,7 @@ public class Kademlia {
         try {
             channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -97,7 +98,7 @@ public class Kademlia {
                 responseNodes.add(toInsert);
             }
         } catch (StatusRuntimeException e) {
-
+            throw new RuntimeException(e);
         }
         closeChannel(channel);
         return responseNodes;
@@ -121,19 +122,19 @@ public class Kademlia {
         int alpha = this.alpha;
         int k = this.k;
 
-        while (probedNodes.size() < k && shortlist.size() > 0 && alpha > 0) {
+        while (probedNodes.size() < k && !shortlist.isEmpty() && alpha > 0) {
 
             // Select alpha nodes from shortlist that they haven´t already been contacted
             LinkedList<Node> toSend = new LinkedList<>();
 
-            while (toSend.size() != getAlpha() && shortlist.size() > 0) {
+            while (toSend.size() != getAlpha() && !shortlist.isEmpty()) {
                 Node toInsert = shortlist.poll().getNode();
                 if (!searchList(probedNodes, toInsert)) {
                     toSend.add(toInsert);
                 }
             }
 
-            while (toSend.size() > 0) {
+            while (!toSend.isEmpty()) {
                 Node nodeToSend = toSend.removeFirst();
 
                 LinkedList<Node> response = sendFindRequest(nodeToSend.getIp(), nodeToSend.getPort(), targetId);
@@ -154,9 +155,8 @@ public class Kademlia {
             alpha--;
         }
 
-        Iterator<NodeWrap> iterator = closestNodes.iterator();
-        while (iterator.hasNext()) {
-            Node toAdd = iterator.next().getNode();
+        for (NodeWrap closestNode : closestNodes) {
+            Node toAdd = closestNode.getNode();
             kBucket.insertNode(toAdd.getIp(), toAdd.getId(), toAdd.getPort());
         }
     }
@@ -173,12 +173,12 @@ public class Kademlia {
         JoinRequest request = JoinRequest.newBuilder().setHash(hash).setIp(IP).setPort(port).setTimestamp(timestamp)
                 .build();
 
-        JoinResponse response = null;
+        JoinResponse response;
 
         try {
             response = kademliaStub.join(request);
         } catch (StatusRuntimeException e) {
-
+            throw new RuntimeException(e);
         }
 
         closeChannel(channel);
@@ -192,7 +192,7 @@ public class Kademlia {
 
             ID = doJoin(/* timestamp */ 2323);
 
-            if (ID.equals("")) {
+            if (ID.isEmpty()) {
                 System.out.print(ID + "--hfxgmdzjfhag--");
                 return;
             }
@@ -280,7 +280,9 @@ public class Kademlia {
             iterator = ((ArrayList) list).iterator();
         }
 
-        while (iterator.hasNext()) {
+        while (true) {
+            assert iterator != null;
+            if (!iterator.hasNext()) break;
             Node next = iterator.next();
             if (next.compare(toSearch))
                 return true;
@@ -301,7 +303,9 @@ public class Kademlia {
         }
 
         int pos = -1;
-        while (iterator.hasNext()) {
+        while (true) {
+            assert iterator != null;
+            if (!iterator.hasNext()) break;
             Node next = iterator.next();
             pos += 1;
             if (next.compare(toSearch))
@@ -322,7 +326,9 @@ public class Kademlia {
             iterator = ((ArrayList) list).iterator();
         }
 
-        while (iterator.hasNext()) {
+        while (true) {
+            assert iterator != null;
+            if (!iterator.hasNext()) break;
             NodeWrap next = iterator.next();
             if (next.compare(toSearch))
                 return true;
