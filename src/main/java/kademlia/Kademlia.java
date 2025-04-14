@@ -25,16 +25,16 @@ public class Kademlia {
     private final int k = 20;
     // Degree of parallelism in network
     private final int alpha = 3;
-    private String bootstrapId = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    private final String bootstrapId = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    private final String bootstrapPort = "8000";
+    private final String bootstrapIp = "localhost";
     private String IP;
     private String ID;
     private String port;
-    private String bootstrapPort = "8000";
-    private String bootstrapIp = "localhost";
     private boolean insideNetwork;
 
     public Kademlia() {
-        this.wallet = Wallet.getInstance();
+        wallet = Wallet.getInstance();
     }
 
     public static Kademlia getInstance() {
@@ -50,19 +50,6 @@ public class Kademlia {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static PriorityQueue<NodeWrap> convertListToPriorityQueue(LinkedList<Node> linkedList, String targetId) {
-
-        PriorityQueue<NodeWrap> result = new PriorityQueue<>(new NodeWrapComparator());
-
-        Node node;
-        while (!linkedList.isEmpty()) {
-            node = linkedList.remove();
-            result.add(new NodeWrap(node, targetId));
-        }
-
-        return result;
     }
 
     private static LinkedList sendFindRequest(String host, String port, String targetId) {
@@ -111,7 +98,14 @@ public class Kademlia {
 
     public void findClosestNodes(String targetId) {
 
-        PriorityQueue<NodeWrap> shortlist = convertListToPriorityQueue(kBucket.getClosestNodes(targetId), targetId);
+        PriorityQueue<NodeWrap> shortlist = new PriorityQueue<>(new NodeWrapComparator());
+
+        LinkedList<Node> bucketClosestNodes = kBucket.getClosestNodes(targetId);
+        Node node;
+        while (!bucketClosestNodes.isEmpty()) {
+            node = bucketClosestNodes.remove();
+            shortlist.add(new NodeWrap(node, targetId));
+        }
 
         if (shortlist.isEmpty()) {
             return;
@@ -125,7 +119,7 @@ public class Kademlia {
 
         while (probedNodes.size() < k && !shortlist.isEmpty() && alpha > 0) {
 
-            // Select alpha nodes from shortlist that they haven´t already been contacted
+            // Select alpha nodes from shortlist that they have not already been contacted
             LinkedList<Node> toSend = new LinkedList<>();
 
             while (toSend.size() != getAlpha() && !shortlist.isEmpty()) {
@@ -191,10 +185,12 @@ public class Kademlia {
 
         if (!port.equals(getBootstrapPort())) {
 
-            ID = doJoin(/* timestamp */ 2323);
+            long timestamp = System.currentTimeMillis();
+
+            ID = doJoin(timestamp);
 
             if (ID.isEmpty()) {
-                System.out.print(ID + "--hfxgmdzjfhag--");
+                //System.out.print(ID + "--empty id--");
                 return;
             }
 
