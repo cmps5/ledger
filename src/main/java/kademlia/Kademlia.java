@@ -1,5 +1,6 @@
 package kademlia;
 
+import auction.Auction;
 import blockchain.Block;
 import com.google.common.math.BigIntegerMath;
 import io.grpc.ManagedChannel;
@@ -221,7 +222,11 @@ public class Kademlia {
         return bootstrapId;
     }
 
-    public void doStore(Block newBlock) {
+    public void storeBlock(Block block) {
+        // TODO
+    }
+
+    public void storeAuction(Auction auction){
         // TODO
     }
 

@@ -20,7 +20,7 @@ public class AuctionManager {
     private final HashMap<String, Auction> auctions;
     private final Blockchain blockchain;
     private final Kademlia kademlia;
-    private HashMap<String, Auction> allAuctions;
+    private final HashMap<String, Auction> allAuctions;
 
     public AuctionManager() {
         this.auctions = new HashMap<>();
@@ -68,6 +68,30 @@ public class AuctionManager {
         this.auctions.remove(name);
     }
 
+    public void publishBid(String name, int value) {
+        Auction auction = allAuctions.get(name);
+
+        if (auction == null) return;
+
+        if (auction.getCurrentBid() >= value || value <= auction.getBasePrice()) {
+            System.out.println("Bid value too low!");
+        }
+
+        Transaction transaction = new Transaction(auction, value, true);
+
+        Block block = new Block(blockchain.getLastBlock().getHash());
+        block.setTransaction(transaction);
+
+        if (blockchain.addBlockPOW(block)) {
+            kademlia.storeBlock(block);
+            registerBid(transaction);
+        }
+    }
+
+    public void registerBid(Transaction transaction) {
+        // TODO
+    }
+
     private void publishLastBid(Auction auction) {
         SecureRandom rand = new SecureRandom();
         try {
@@ -91,12 +115,15 @@ public class AuctionManager {
         }
     }
 
-
-    public void printAuctions() {
-        // @TODO
+    public HashMap<String, Auction> getAuctions() {
+        return this.auctions;
     }
 
-    public void publishBid(String topic, int i) {
+    public HashMap<String, Auction> getAllAuctions() {
+        return this.allAuctions;
+    }
+
+    public void printAuctions() {
         // @TODO
     }
 }

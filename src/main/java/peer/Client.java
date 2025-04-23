@@ -2,18 +2,20 @@ package peer;
 
 import auction.Auction;
 import auction.AuctionManager;
-import blockchain.*;
+import blockchain.Block;
+import blockchain.Blockchain;
+import blockchain.Transaction;
 import kademlia.Kademlia;
 
 import java.util.Scanner;
 
 public class Client implements Runnable {
 
-    private Scanner scanner;
-    private Kademlia kademlia;
-    private Blockchain blockchain;
-    private AuctionManager auctionManager;
-    private Wallet wallet;
+    private final Scanner scanner;
+    private final Kademlia kademlia;
+    private final Blockchain blockchain;
+    private final AuctionManager auctionManager;
+    private final Wallet wallet;
 
     public Client() {
         this.kademlia = Kademlia.getInstance();
@@ -36,9 +38,6 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        String IP;
-        String ID;
-        String Port;
 
         while (true) {
 
@@ -80,14 +79,14 @@ public class Client implements Runnable {
                     Transaction transaction = new Transaction(auction, Integer.parseInt(basePrice) + 100, true);
 
                     if (blockchain.getBlockchain().isEmpty())
-                        block = new Block(blockchain.GENESIS_PREV_HASH);
+                        block = new Block(Blockchain.GENESIS_PREV_HASH);
                     else
                         block = new Block(blockchain.getLastBlock().getHash());
 
                     block.setTransaction(transaction);
 
                     blockchain.addBlockPOW(block);
-                    kademlia.doStore(block);
+                    kademlia.storeBlock(block);
                     break;
                 }
                 case "4": {

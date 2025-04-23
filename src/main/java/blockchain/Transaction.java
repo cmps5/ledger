@@ -13,4 +13,9 @@ public class Transaction {
         this.itemName = auction.getName();
         this.price = amount;
     }
+
+    @Override
+    public String toString(){
+        return "Transaction: {Item name: " + itemName + "; Price: " + price+"}";
+    }
 }
