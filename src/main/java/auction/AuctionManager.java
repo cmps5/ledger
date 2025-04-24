@@ -9,6 +9,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -66,6 +67,7 @@ public class AuctionManager {
         publishLastBid(auctionToClose);
 
         this.auctions.remove(name);
+        this.allAuctions.remove(name);
     }
 
     public void publishBid(String name, int value) {
@@ -115,6 +117,20 @@ public class AuctionManager {
         }
     }
 
+    public void registerAuction(Auction auction) {
+        allAuctions.put(auction.getName(), auction);
+
+        Timer timer = new Timer();
+        long duration = Duration.between(LocalDateTime.now(), auction.getCountdown()).toMillis();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                closeAuction(auction.getName());
+            }
+        }, duration);
+    }
+
     public HashMap<String, Auction> getAuctions() {
         return this.auctions;
     }
@@ -124,6 +140,16 @@ public class AuctionManager {
     }
 
     public void printAuctions() {
-        // @TODO
+        System.out.println("My auctions");
+        for (Map.Entry<String, Auction> entry : auctions.entrySet()) {
+            entry.getValue().printAuction();
+        }
+    }
+
+    public void printAllAuctions() {
+        System.out.println("All auctions");
+        for (Map.Entry<String, Auction> entry : allAuctions.entrySet()) {
+            entry.getValue().printAuction();
+        }
     }
 }
