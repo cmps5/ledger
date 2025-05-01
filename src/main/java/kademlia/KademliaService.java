@@ -39,4 +39,19 @@ public class KademliaService extends KademliaGrpc.KademliaImplBase {
         responseObserver.onCompleted(); // End connection
     }
 
+    @Override
+    public void ping(NodeInfo request, StreamObserver<NodeInfo> responseObserver) {
+
+        if (!kademlia.isInsideNetwork()) return;
+
+        NodeInfo.Builder response = NodeInfo.newBuilder();
+
+        response.setId(request.getId());
+        response.setIp(request.getIp());
+        response.setPort(request.getPort());
+
+        responseObserver.onNext(response.build()); // Build response and send
+        responseObserver.onCompleted(); // End connection
+    }
+
 }
