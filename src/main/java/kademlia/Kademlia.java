@@ -351,4 +351,12 @@ public class Kademlia {
     public void search(String key) {
         //
     }
+
+    public void insertNode(String ip, String id, String port){
+        kBucket.insertNode(ip, id, port);
+    }
+
+    public LinkedList<Node> getClosestNodes(String target, Node requesterNode){
+        return kBucket.getClosestNodes(target, requesterNode);
+    }
 }

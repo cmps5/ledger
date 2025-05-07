@@ -6,6 +6,7 @@ import io.grpc.StatusRuntimeException;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class KBucket {
@@ -29,32 +30,64 @@ public class KBucket {
         LinkedList<Node> closestNodes = new LinkedList<>();
 
         int distance = Kademlia.getInstance().findDistancePos(target, node.getId());
-        int alphaValues = Kademlia.getInstance().getAlpha();
+        int alpha = Kademlia.getInstance().getAlpha();
 
-        for (int i = 0; i < alphaValues && i < kbucket[distance].size(); i++) {
-            closestNodes.add((Node) kbucket[distance].get(i));
-        }
+        alpha = addNodesFromBucket(distance, alpha, closestNodes);
 
-        for (int i = 1; alphaValues > 0 && (distance - i >= 0 || distance + i < 160); i++) {
-            if (distance - i >= 0 && !kbucket[distance - i].isEmpty()) {
-                for (int x = 0; x < kbucket[distance - i].size() && alphaValues > 0; x++) {
-                    closestNodes.add((Node) kbucket[distance - i].get(x));
-                    alphaValues--;
-                }
+        for (int i = 1; alpha > 0 && (distance - i >= 0 || distance + i < 160); i++) {
+            if (distance - i >= 0) {
+                alpha = addNodesFromBucket(distance - i, alpha, closestNodes);
             }
-            if (alphaValues == 0)
-                break;
-
-            if (distance + i < 160 && !kbucket[distance + i].isEmpty()) {
-                for (int x = 0; x < kbucket[distance + i].size() && alphaValues > 0; x++) {
-                    closestNodes.add((Node) kbucket[distance + i].get(x));
-                    alphaValues--;
-                }
+            if (alpha == 0) break;
+            if (distance + i < 160) {
+                alpha = addNodesFromBucket(distance + i, alpha, closestNodes);
             }
         }
 
         return closestNodes;
     }
+
+    private int addNodesFromBucket(int index, int remaining, LinkedList<Node> list) {
+        List<Node> bucket = kbucket[index];
+        for (int i = 0; i < bucket.size() && remaining > 0; i++, remaining--) {
+            list.add(bucket.get(i));
+        }
+        return remaining;
+    }
+
+
+    public synchronized LinkedList<Node> getClosestNodes(String targetId, Node requesterNode) {
+        LinkedList<Node> closestNodes = new LinkedList<>();
+
+        int distance = Kademlia.getInstance().findDistancePos(targetId, node.getId());
+        int alpha = Kademlia.getInstance().getAlpha();
+
+        alpha = addNodesExcludingRequester(distance, alpha, closestNodes, requesterNode);
+
+        for (int i = 1; alpha > 0 && (distance - i >= 0 || distance + i < 160); i++) {
+            if (distance - i >= 0) {
+                alpha = addNodesExcludingRequester(distance - i, alpha, closestNodes, requesterNode);
+            }
+            if (alpha == 0) break;
+            if (distance + i < 160) {
+                alpha = addNodesExcludingRequester(distance + i, alpha, closestNodes, requesterNode);
+            }
+        }
+
+        return closestNodes;
+    }
+
+    private int addNodesExcludingRequester(int index, int remaining, LinkedList<Node> list, Node requesterNode) {
+        List<Node> bucket = kbucket[index];
+        for (int i = 0; i < bucket.size() && remaining > 0; i++) {
+            Node node = bucket.get(i);
+            if (node.compare(requesterNode)) continue;
+            list.add(node);
+            remaining--;
+        }
+        return remaining;
+    }
+
 
     public synchronized void insertNode(String nodeIP, String nodeID, String nodePort) {
         Node nodeToInsert = new Node(nodeIP, nodePort, nodeID);

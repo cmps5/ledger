@@ -10,6 +10,7 @@ service Kademlia {
   rpc ping(NodeInfo) returns (NodeInfo);
   rpc store (StoreRequest) returns (StoreResponse);
   rpc findNode (FindNodeRequest) returns (stream FindNodeResponse);
+  rpc findValue (FindValueRequest) returns (stream FindValueResponse);
   rpc join (JoinRequest) returns (JoinResponse);
 }
 
@@ -31,6 +32,18 @@ message FindNodeRequest {
 
 message FindNodeResponse {
   NodeInfo node = 1;
+}
+
+message FindValueRequest{
+  string targetKey = 1;
+  NodeInfo sender = 2;
+}
+
+message FindValueResponse {
+  oneof NodeOrValue {
+    BlockProto block = 1;
+    NodeInfo node = 2;
+  }
 }
 
 message SignatureProto{

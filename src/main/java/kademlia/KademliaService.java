@@ -54,4 +54,21 @@ public class KademliaService extends KademliaGrpc.KademliaImplBase {
         responseObserver.onCompleted(); // End connection
     }
 
+    @Override
+    public void findNode(FindNodeRequest request, StreamObserver<FindNodeResponse> responseObserver) {
+
+        if (!kademlia.isInsideNetwork()) return;
+
+        // TODO
+    }
+
+    @Override
+    public void findValue(FindValueRequest request, StreamObserver<FindValueResponse> responseObserver) {
+
+        if (!kademlia.isInsideNetwork()) return;
+
+        // TODO
+
+    }
+
 }
