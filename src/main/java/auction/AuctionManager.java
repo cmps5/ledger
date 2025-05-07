@@ -42,6 +42,7 @@ public class AuctionManager {
         Auction auction = new Auction(name, basePrice);
 
         this.auctions.put(name, auction);
+        this.allAuctions.put(name, auction);
 
         //Close auction after deadline
         Timer timer = new Timer();
@@ -73,15 +74,19 @@ public class AuctionManager {
     public void publishBid(String name, int value) {
         Auction auction = allAuctions.get(name);
 
-        if (auction == null) return;
+        if (auction == null) {
+            System.out.println("Auction not found!");
+            return;
+        }
 
         if (auction.getCurrentBid() >= value || value <= auction.getBasePrice()) {
             System.out.println("Bid value too low!");
+            return;
         }
 
         Transaction transaction = new Transaction(auction, value, true);
 
-        Block block = new Block(blockchain.getLastBlock().getHash());
+        Block block = new Block(blockchain.getLastBlockHash(blockchain.getBlockchain()));
         block.setTransaction(transaction);
 
         if (blockchain.addBlockPOW(block)) {
@@ -92,6 +97,7 @@ public class AuctionManager {
 
     public void registerBid(Transaction transaction) {
         // TODO
+        System.out.println("Working on it");
     }
 
     private void publishLastBid(Auction auction) {
@@ -109,7 +115,7 @@ public class AuctionManager {
         Transaction transaction = new Transaction(auction, auction.getCurrentBid(), false);
 
         Block block;
-        block = new Block(blockchain.getLastBlock().getPreviousHash());
+        block = new Block(blockchain.getLastBlockHash(blockchain.getBlockchain()));
         block.setTransaction(transaction);
 
         if (blockchain.addBlockPOW(block)) {
