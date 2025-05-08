@@ -1,5 +1,8 @@
 package auction;
 
+import peer.Wallet;
+
+import java.security.PublicKey;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
@@ -9,21 +12,27 @@ public class Auction {
     private final int basePrice;
     private final LocalDateTime countdown;
     boolean active;
+    private String sellerID;
+    private PublicKey sellerPubKey;
     private int currentBid;
     private String currentBidder;
     private HashMap<String, Integer> bids = null;
 
-    public Auction(String name, int basePrice) {
+    private Wallet wallet;
 
+    public Auction(String name, int basePrice) {
+        wallet = Wallet.getInstance();
         this.bids = new HashMap<>();
 
-        this.countdown = LocalDateTime.now().plusSeconds(300); // 5min countdown (300 secs)
-
-        this.basePrice = basePrice;
-        this.currentBid = basePrice;
-
         this.name = name;
+        this.basePrice = basePrice;
+        this.countdown = LocalDateTime.now().plusSeconds(300); // 5min countdown (300 secs)
         this.active = true;
+
+        this.currentBid = basePrice;
+        this.currentBidder = wallet.getID();
+        this.sellerID = wallet.getID();
+        this.sellerPubKey = wallet.getPubKey();
 
     }
 
@@ -54,15 +63,6 @@ public class Auction {
     }
 
     // Getters & Setters
-
-    public void isActive(boolean active) {
-        this.active = active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     public LocalDateTime getCountdown() {
         return countdown;
     }
@@ -89,5 +89,37 @@ public class Auction {
 
     public void setCurrentBidder(String currentBidder) {
         this.currentBidder = currentBidder;
+    }
+
+    public PublicKey getSellerPubKey() {
+        return sellerPubKey;
+    }
+
+    public void setSellerPubKey(PublicKey sellerPubKey) {
+        this.sellerPubKey = sellerPubKey;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public String getSellerID() {
+        return sellerID;
+    }
+
+    public void setSellerID(String sellerID) {
+        this.sellerID = sellerID;
+    }
+
+    public HashMap<String, Integer> getBids() {
+        return bids;
+    }
+
+    public void setBids(HashMap<String, Integer> bids) {
+        this.bids = bids;
     }
 }
