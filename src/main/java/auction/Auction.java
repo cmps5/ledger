@@ -54,12 +54,14 @@ public class Auction {
         System.out.println("\n\n");
     }
 
-    public void registerBid(int amount, String bidderID) {
+    public boolean registerBid(int amount, String bidderID) {
         if (amount > currentBid && LocalDateTime.now().isBefore(this.countdown) && this.active) {
             currentBid = amount;
             currentBidder = bidderID;
             bids.put(bidderID, amount);
+            return true;
         }
+        return false;
     }
 
     // Getters & Setters

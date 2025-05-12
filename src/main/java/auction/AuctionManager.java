@@ -95,9 +95,15 @@ public class AuctionManager {
         }
     }
 
-    public void registerBid(Transaction transaction) {
-        // TODO
-        System.out.println("Working on it");
+    public boolean registerBid(Transaction transaction) {
+        Auction auction;
+        if (allAuctions.containsKey(transaction.getItemName())) {
+            auction = allAuctions.get(transaction.getItemName());
+        } else {
+            return true;
+        }
+
+        return auction.registerBid(transaction.getPrice(), transaction.getBuyerID());
     }
 
     private void publishLastBid(Auction auction) {

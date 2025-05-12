@@ -111,7 +111,7 @@ public class Client implements Runnable {
                     break;
                 }
                 case "7": {
-                    System.out.print("Topic: ");
+                    System.out.print("Name: ");
                     String topic = scanner.nextLine();
 
                     System.out.print("Bid: ");
