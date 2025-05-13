@@ -46,7 +46,7 @@ public class Transaction {
 
     private byte[] generateSignature(String hash) {
         try {
-            Signature signature = Signature.getInstance("SHA256withECDSA");
+            Signature signature = Signature.getInstance("SHA256withRSA");
             signature.initSign(wallet.getPrivKey());
             signature.update(new BigInteger(hash, 16).toByteArray());
             return signature.sign();
