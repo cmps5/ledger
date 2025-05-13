@@ -3,8 +3,11 @@ package blockchain;
 import auction.Auction;
 import peer.Wallet;
 
-import java.security.PublicKey;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 public class Transaction {
 
@@ -42,18 +45,55 @@ public class Transaction {
     }
 
     private byte[] generateSignature(String hash) {
-        //@ TODO
-        return null;
+        try {
+            Signature signature = Signature.getInstance("SHA256withECDSA");
+            signature.initSign(wallet.getPrivKey());
+            signature.update(new BigInteger(hash, 16).toByteArray());
+            return signature.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException("Failed to sign hash", e);
+        }
     }
 
     private String generateCheckSum(Auction auction, PublicKey auctioneerPublicKey, String buyerID, String buyerIP, String buyerPort) {
-        // @ TODO
-        return null;
+        String pubKeyHex;
+        {
+            byte[] pubKeyBytes = auctioneerPublicKey.getEncoded();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : pubKeyBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            pubKeyHex = sb.toString();
+        }
+
+        String dataToHash = auction.getName() + pubKeyHex + buyerID + buyerIP + buyerPort;
+
+        // Hashing with SHA-256
+        String checksum;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(dataToHash.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            checksum = sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        return checksum;
     }
+
 
     @Override
     public String toString() {
-        return "Transaction: {Item name: " + itemName + "; Price: " + price + "}";
+        return "Transaction:" +
+                "\nItem name: " + itemName +
+                ";\n Price: " + price +
+                ";\n Timestamp: " + timestamp +
+                ";\n Signature: " + Arrays.toString(signature) +
+                ";\n Buyer ID: " + buyerID;
     }
 
     public boolean isActive() {
