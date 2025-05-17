@@ -163,9 +163,8 @@ public class Kademlia {
                 .usePlaintext().build();
         KademliaGrpc.KademliaBlockingStub kademliaStub = KademliaGrpc.newBlockingStub(channel); // Sync
 
-        int nonce = 0;
 
-        String hash = IP + port + timestamp + nonce;
+        String hash = IP + port + timestamp;
         JoinRequest request = JoinRequest.newBuilder().setHash(hash).setIp(IP).setPort(port).setTimestamp(timestamp)
                 .build();
 
@@ -191,10 +190,11 @@ public class Kademlia {
             ID = doJoin(timestamp);
 
             if (ID.isEmpty()) {
-                //System.out.print(ID + "--empty id--");
+                System.out.print("--empty id--");
                 return;
             }
 
+            System.out.println("Generated ID: " + ID + " (" + ID.length() + " bits)");
             wallet.setID(ID);
 
             this.insideNetwork = true;
@@ -226,7 +226,7 @@ public class Kademlia {
         // TODO
     }
 
-    public void storeAuction(Auction auction){
+    public void storeAuction(Auction auction) {
         // TODO
     }
 
@@ -352,11 +352,11 @@ public class Kademlia {
         //
     }
 
-    public void insertNode(String ip, String id, String port){
+    public void insertNode(String ip, String id, String port) {
         kBucket.insertNode(ip, id, port);
     }
 
-    public LinkedList<Node> getClosestNodes(String target, Node requesterNode){
+    public LinkedList<Node> getClosestNodes(String target, Node requesterNode) {
         return kBucket.getClosestNodes(target, requesterNode);
     }
 }
