@@ -8,6 +8,7 @@ import peer.Wallet;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
 
 public class KademliaService extends KademliaGrpc.KademliaImplBase {
 
@@ -90,10 +91,30 @@ public class KademliaService extends KademliaGrpc.KademliaImplBase {
 
     @Override
     public void findNode(FindNodeRequest request, StreamObserver<FindNodeResponse> responseObserver) {
-        System.out.println("Received findNode request");
+        //System.out.println("Received findNode request");
         if (!kademlia.isInsideNetwork()) return;
 
-        // TODO
+        String targetId = request.getTargetId();
+        Node senderRequest = new Node(request.getSender().getIp(), request.getSender().getPort(), request.getSender().getId());
+
+        LinkedList<Node> closestNodes = kademlia.getClosestNodes(targetId, senderRequest);
+
+        for (Node closestNode : closestNodes) {
+            NodeInfo.Builder nodeInfo = NodeInfo.newBuilder();
+            nodeInfo.setPort(closestNode.getPort());
+            nodeInfo.setId(closestNode.getId());
+            nodeInfo.setIp(closestNode.getIp());
+
+            FindNodeResponse response = FindNodeResponse.newBuilder()
+                    .setNode(nodeInfo)
+                    .build();
+
+            responseObserver.onNext(response);
+        }
+
+        responseObserver.onCompleted();
+
+        kademlia.insertNode(request.getSender().getIp(), request.getSender().getId(), request.getSender().getPort());
     }
 
     @Override
