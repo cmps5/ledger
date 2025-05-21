@@ -55,6 +55,21 @@ public class Transaction {
         }
     }
 
+    public boolean verifySignature(byte[] signature, String hash, PublicKey pubKey) {
+        if (signature == null) {
+            return false;
+        }
+
+        try {
+            Signature sign = Signature.getInstance("SHA256withRSA");
+            sign.initSign(wallet.getPrivKey());
+            sign.update(new BigInteger(hash, 16).toByteArray());
+            return sign.verify(signature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException("Failed to verify hash", e);
+        }
+    }
+
     private String generateCheckSum(Auction auction, PublicKey auctioneerPublicKey, String buyerID, String buyerIP, String buyerPort) {
         String pubKeyHex;
         {
