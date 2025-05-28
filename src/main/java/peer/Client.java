@@ -28,11 +28,11 @@ public class Client implements Runnable {
     private void menu() {
         System.out.println("\n");
         System.out.println("1. Enter Kademlia");
-        System.out.println("2. Search Value in Kademlia");
-        System.out.println("3. Store Block");
-        System.out.println("4. Print Blockchain");
-        System.out.println("5. Start Auction");
-        System.out.println("6. Print Auctions");
+        System.out.println("2. Store Block");
+        System.out.println("3. Print Blockchain");
+        System.out.println("4. Start Auction");
+        System.out.println("5. Print my Auctions");
+        System.out.println("6. Print all Auctions");
         System.out.println("7. Send Bid");
     }
 
@@ -55,14 +55,7 @@ public class Client implements Runnable {
                     kademlia.enterKademlia();
                     break;
                 }
-                case "2": { //search node
-                    String key;
-                    System.out.print("Key: ");
-                    key = scanner.nextLine();
-                    kademlia.search(key);
-                    break;
-                }
-                case "3": {
+                case "2": {
                     Block block;
                     String name;
                     String basePrice;
@@ -89,11 +82,11 @@ public class Client implements Runnable {
                     kademlia.storeBlock(block);
                     break;
                 }
-                case "4": {
+                case "3": {
                     System.out.println(blockchain.toString());
                     break;
                 }
-                case "5": { //startAuction
+                case "4": { //startAuction
                     String name;
                     String basePrice;
 
@@ -106,8 +99,12 @@ public class Client implements Runnable {
                     auctionManager.createNewAuction(name, Integer.parseInt(basePrice));
                     break;
                 }
-                case "6": {
+                case "5":{
                     auctionManager.printAuctions();
+                    break;
+                }
+                case "6": {
+                    auctionManager.printAllAuctions();
                     break;
                 }
                 case "7": {

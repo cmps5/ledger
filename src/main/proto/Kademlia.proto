@@ -105,4 +105,6 @@ message JoinRequest{
 
 message JoinResponse{
   string id = 1;
+  int32 hasBlock = 2;
+  BlockProto headBlock = 3;
 }

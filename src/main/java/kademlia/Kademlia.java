@@ -2,7 +2,9 @@ package kademlia;
 
 import auction.Auction;
 import blockchain.Block;
+import blockchain.Transaction;
 import com.google.common.math.BigIntegerMath;
+import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -10,8 +12,8 @@ import peer.Wallet;
 
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -96,7 +98,118 @@ public class Kademlia {
     }
 
     public static void sendStoreRequest(Node toSend, String key, Object dataToSend) {
-        // @TODO
+
+        Node node = kBucket.getNode();
+        NodeInfo sender = NodeInfo.newBuilder()
+                .setId(node.getId())
+                .setIp(node.getIp())
+                .setPort(node.getPort())
+                .build();
+
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(toSend.getIp(), Integer.parseInt(toSend.getPort()))
+                .usePlaintext().build();
+
+        KademliaGrpc.KademliaBlockingStub kademliaStub = KademliaGrpc.newBlockingStub(channel); //Sync
+
+        StoreRequest request = null;
+        if (dataToSend.getClass() == Block.class) {
+            request = StoreRequest.newBuilder()
+                    .setSender(sender)
+                    .setKey(key)
+                    .setBlock(blockToProto((Block) dataToSend))
+                    .build();
+        } else if (dataToSend.getClass() == Auction.class) {
+            request = StoreRequest.newBuilder()
+                    .setSender(sender)
+                    .setKey(key)
+                    .setAuction(auctionToProto((Auction) dataToSend))
+                    .build();
+        }
+
+        if (request == null) {
+            closeChannel(channel);
+        }
+
+        StoreResponse response = null;
+        try {
+            response = kademliaStub.withDeadlineAfter(300000, TimeUnit.MILLISECONDS).store(request);
+
+        } catch (StatusRuntimeException e) {
+            e.printStackTrace();
+        }
+
+        closeChannel(channel);
+    }
+
+    private static AuctionProto auctionToProto(Auction auction) {
+        long timestampMillis = auction.getCountdown()
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+
+        byte[] auctionSignature;
+
+        try {
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(wallet.getPrivKey());
+            signature.update(new BigInteger(auction.getName(), 16).toByteArray());
+            auctionSignature = signature.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException("Failed to sign hash", e);
+        }
+
+        byte[] pubKeyBytes = wallet.getPubKey().getEncoded();
+
+        SignatureProto signatureProto = SignatureProto.newBuilder()
+                .setSignature(ByteString.copyFrom(auctionSignature))
+                .setHash(auction.getName())
+                .setPublicKey(ByteString.copyFrom(pubKeyBytes))
+                .build();
+
+        return AuctionProto.newBuilder()
+                .setName(auction.getName())
+                .setCurrentBid(auction.getCurrentBid())
+                .setCurrentBidder(auction.getCurrentBidder())
+                .setBasePrice(auction.getBasePrice())
+                .setDeadline(timestampMillis)
+                .setSignature(signatureProto)
+                .setSellerID(auction.getSellerID())
+                .setSellerPubKey(ByteString.copyFrom(auction.getSellerPubKey().getEncoded()))
+                .build();
+    }
+
+    static BlockProto blockToProto(Block block) {
+        return BlockProto.newBuilder()
+                .setHash(block.getHash())
+                .setNonce(block.getNonce())
+                .setPrevioushash(block.getPreviousHash())
+                .setTimestamp(block.getTimeStamp())
+                .setTransaction(transactionToProto(block.getTransaction()))
+                .build();
+    }
+
+    private static TransactionProto transactionToProto(Transaction transaction) {
+        SignatureProto signatureProto = SignatureProto.newBuilder()
+                .setSignature(ByteString.copyFrom(transaction.getSignature()))
+                .setHash(transaction.getHash())
+                .setPublicKey(ByteString.copyFrom(transaction.getBuyerPublicKey().getEncoded()))
+                .build();
+
+        NodeInfo buyerInfo = NodeInfo.newBuilder()
+                .setId(transaction.getBuyerID())
+                .setIp(transaction.getBuyerIP())
+                .setPort(transaction.getBuyerPort())
+                .build();
+
+        return TransactionProto.newBuilder()
+                .setName(transaction.getItemName())
+                .setFinalPrice(transaction.getPrice())
+                .setTimestamp(transaction.getTimestamp().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                .setAtive(transaction.isActive())
+                .setAuctionPublicKey(ByteString.copyFrom(transaction.getAuctioneerPublicKey().getEncoded()))
+                .setSignature(signatureProto)
+                .setBuyerInfo(buyerInfo)
+                .build();
     }
 
     public boolean isInsideNetwork() {
@@ -252,7 +365,9 @@ public class Kademlia {
 
         // Send STORE gRPC
         Iterator iterator = closestNodes.iterator();
+        int i = 0;
         while (iterator.hasNext()) {
+            System.out.println("sending store request " + i++);
             sendStoreRequest((Node) iterator.next(), keyConverted, block);
         }
     }
@@ -286,8 +401,10 @@ public class Kademlia {
         if (auction.isActive()) {
             // Send STORE gRPC
             Iterator iterator = closestNodes.iterator();
+            int i = 0;
             while (iterator.hasNext()) {
                 sendStoreRequest((Node) iterator.next(), keyConverted, auction);
+                System.out.println("sending store request " + i++);
             }
         }
     }

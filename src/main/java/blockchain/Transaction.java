@@ -1,12 +1,18 @@
 package blockchain;
 
 import auction.Auction;
+import kademlia.TransactionProto;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import peer.Wallet;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 
 public class Transaction {
@@ -44,6 +50,52 @@ public class Transaction {
         this.signature = generateSignature(this.hash);
     }
 
+    public Transaction(TransactionProto transaction) {
+        this.itemName = transaction.getName();
+        this.price = transaction.getFinalPrice();
+        this.timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(transaction.getTimestamp()), ZoneId.systemDefault());
+        this.buyerPublicKey = bytesToPubKey(transaction.getSignature().getPublicKey().toByteArray());
+        this.hash = transaction.getSignature().getHash();
+        this.auctioneerPublicKey = bytesToPubKey(transaction.getAuctionPublicKey().toByteArray());
+        this.signature = transaction.getSignature().getSignature().toByteArray();
+        this.buyerID = transaction.getBuyerInfo().getId();
+        this.buyerIP = transaction.getBuyerInfo().getIp();
+        this.buyerPort = transaction.getBuyerInfo().getPort();
+        this.isActive = transaction.getAtive();
+    }
+
+    public static boolean verifySignature(byte[] signature, String hash, PublicKey pubKey) {
+        if (signature == null || pubKey == null || hash == null) {
+            return false;
+        }
+
+        try {
+            Signature sign = Signature.getInstance("SHA256withRSA");
+            sign.initVerify(pubKey);
+            sign.update(new BigInteger(hash, 16).toByteArray());
+            return sign.verify(signature);
+        } catch (NoSuchAlgorithmException | SignatureException e) {
+            throw new RuntimeException("Failed to verify hash", e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PublicKey bytesToPubKey(byte[] byteKey) {
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(byteKey);
+        // Get the RSA key factory
+        KeyFactory keyFactory = null;
+        PublicKey publicKey = null;
+        try {
+            keyFactory = KeyFactory.getInstance("RSA", new BouncyCastleProvider());
+            // Generate the PublicKey object
+            publicKey = keyFactory.generatePublic(keySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
+        return publicKey;
+    }
+
     private byte[] generateSignature(String hash) {
         try {
             Signature signature = Signature.getInstance("SHA256withRSA");
@@ -52,21 +104,6 @@ public class Transaction {
             return signature.sign();
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException("Failed to sign hash", e);
-        }
-    }
-
-    public static boolean verifySignature(byte[] signature, String hash, PublicKey pubKey) {
-        if (signature == null) {
-            return false;
-        }
-
-        try {
-            Signature sign = Signature.getInstance("SHA256withRSA");
-            sign.initSign(wallet.getPrivKey());
-            sign.update(new BigInteger(hash, 16).toByteArray());
-            return sign.verify(signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-            throw new RuntimeException("Failed to verify hash", e);
         }
     }
 

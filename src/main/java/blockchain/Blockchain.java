@@ -214,6 +214,22 @@ public class Blockchain {
         }
     }
 
+    public List<Block> getChain() {
+        return chain;
+    }
+
+    public void setChain(List<Block> chain) {
+        this.chain = chain;
+    }
+
+    public List<List<Block>> getConflictChains() {
+        return conflictChains;
+    }
+
+    public void setConflictChains(List<List<Block>> conflictChains) {
+        this.conflictChains = conflictChains;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
