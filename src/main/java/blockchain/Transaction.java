@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class Transaction {
 
-    private Wallet wallet;
+    private static Wallet wallet;
 
     private String itemName;
     private int price;
@@ -55,7 +55,7 @@ public class Transaction {
         }
     }
 
-    public boolean verifySignature(byte[] signature, String hash, PublicKey pubKey) {
+    public static boolean verifySignature(byte[] signature, String hash, PublicKey pubKey) {
         if (signature == null) {
             return false;
         }

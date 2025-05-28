@@ -1,27 +1,31 @@
 package kademlia;
 
+import auction.Auction;
 import auction.AuctionManager;
+import blockchain.Block;
 import blockchain.Blockchain;
+import blockchain.Transaction;
 import io.grpc.stub.StreamObserver;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import peer.Wallet;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
 import java.util.LinkedList;
 
 public class KademliaService extends KademliaGrpc.KademliaImplBase {
 
     Kademlia kademlia;
-    Blockchain blockChain;
-    AuctionManager auctionApp;
+    Blockchain blockchain;
+    AuctionManager auctionManager;
     Wallet wallet;
 
     public KademliaService(Kademlia kademlia) {
         this.kademlia = kademlia;
         this.wallet = Wallet.getInstance();
-        this.blockChain = Blockchain.getInstance();
-        this.auctionApp = AuctionManager.getInstance();
+        this.blockchain = Blockchain.getInstance();
+        this.auctionManager = AuctionManager.getInstance();
     }
 
     @Override
@@ -87,6 +91,14 @@ public class KademliaService extends KademliaGrpc.KademliaImplBase {
 
         responseObserver.onNext(response.build()); // Build response and send
         responseObserver.onCompleted(); // End connection
+    }
+
+    @Override
+    public void store(StoreRequest request, StreamObserver<StoreResponse> responseObserver) {
+
+        if (!kademlia.isInsideNetwork()) return;
+
+        // @ TODO
     }
 
     @Override

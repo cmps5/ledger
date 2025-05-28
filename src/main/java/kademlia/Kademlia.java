@@ -10,6 +10,8 @@ import peer.Wallet;
 
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -91,6 +93,10 @@ public class Kademlia {
         }
         closeChannel(channel);
         return responseNodes;
+    }
+
+    public static void sendStoreRequest(Node toSend, String key, Object dataToSend) {
+        // @TODO
     }
 
     public boolean isInsideNetwork() {
@@ -223,11 +229,79 @@ public class Kademlia {
     }
 
     public void storeBlock(Block block) {
-        // TODO
+        // Hash the block's hash
+        byte[] key;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            key = digest.digest(block.getHash().getBytes());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Convert the hash to a binary string
+        BigInteger inputBigInt = new BigInteger(1, key);
+        String keyConverted = inputBigInt.toString(2);
+        while (keyConverted.length() % 8 != 0) {
+            keyConverted = "0" + keyConverted;
+        }
+
+        // Do the lookup process
+        findClosestNodes(keyConverted);
+        // Search the closest Nodes on the bucket
+        LinkedList<Node> closestNodes = kBucket.getClosestNodes(keyConverted);
+
+        // Send STORE gRPC
+        Iterator iterator = closestNodes.iterator();
+        while (iterator.hasNext()) {
+            sendStoreRequest((Node) iterator.next(), keyConverted, block);
+        }
     }
 
     public void storeAuction(Auction auction) {
-        // TODO
+        // Convert auction name (hex string) to byte array
+        BigInteger bigInteger = new BigInteger(auction.getName(), 16);
+        byte[] auctionNameBytes = bigInteger.toByteArray();
+
+        // Hash the byte array using SHA-1
+        byte[] key;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            key = digest.digest(auctionNameBytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Convert the hash to a binary string
+        BigInteger inputBigInt = new BigInteger(1, key);
+        String keyConverted = inputBigInt.toString(2);
+        while (keyConverted.length() % 8 != 0) {
+            keyConverted = "0" + keyConverted;
+        }
+
+        // Do the lookup process
+        findClosestNodes(keyConverted);
+        // Search the closest Nodes on the bucket
+        LinkedList<Node> closestNodes = kBucket.getClosestNodes(keyConverted);
+
+        if (auction.isActive()) {
+            // Send STORE gRPC
+            Iterator iterator = closestNodes.iterator();
+            while (iterator.hasNext()) {
+                sendStoreRequest((Node) iterator.next(), keyConverted, auction);
+            }
+        }
+    }
+
+    public void disseminateStore(Object dataToStore, String key) {
+        ArrayList[] allNodes = kBucket.getKbucket();
+        for (int i = 0; i < 160; i++) {
+            if (!allNodes[i].isEmpty()) {
+                for (int x = 0; x < allNodes[i].size(); x++) {
+                    Node node = (Node) allNodes[i].get(x);
+                    sendStoreRequest(node, key, dataToStore);
+                }
+            }
+        }
     }
 
     public String getIP() {
