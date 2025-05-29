@@ -38,7 +38,7 @@ public class AuctionManager {
     }
 
 
-    public void createNewAuction(String name, int basePrice) {
+    public synchronized void createNewAuction(String name, int basePrice) {
         Auction auction = new Auction(name, basePrice);
 
         this.auctions.put(name, auction);
@@ -71,7 +71,7 @@ public class AuctionManager {
         this.allAuctions.remove(name);
     }
 
-    public void publishBid(String name, int value) {
+    public synchronized void publishBid(String name, int value) {
         Auction auction = allAuctions.get(name);
 
         if (auction == null) {
@@ -95,7 +95,7 @@ public class AuctionManager {
         }
     }
 
-    public boolean registerBid(Transaction transaction) {
+    public synchronized boolean registerBid(Transaction transaction) {
         Auction auction;
         if (allAuctions.containsKey(transaction.getItemName())) {
             auction = allAuctions.get(transaction.getItemName());
@@ -106,7 +106,7 @@ public class AuctionManager {
         return auction.registerBid(transaction.getPrice(), transaction.getBuyerID());
     }
 
-    private void publishLastBid(Auction auction) {
+    private synchronized void publishLastBid(Auction auction) {
         SecureRandom rand = new SecureRandom();
         try {
             int randomTime = rand.nextInt(1000);
@@ -129,7 +129,7 @@ public class AuctionManager {
         }
     }
 
-    public void registerAuction(Auction auction) {
+    public synchronized void registerAuction(Auction auction) {
         allAuctions.put(auction.getName(), auction);
 
         Timer timer = new Timer();
@@ -138,7 +138,7 @@ public class AuctionManager {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                closeAuction(auction.getName());
+                    //closeAuction(auction.getName());
             }
         }, duration);
     }

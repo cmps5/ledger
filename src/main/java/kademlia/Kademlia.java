@@ -313,7 +313,7 @@ public class Kademlia {
                 return;
             }
 
-            System.out.println("Generated ID: " + ID + " (" + ID.length() + " bits)");
+            System.out.println("Generated ID: " + ID);
             wallet.setID(ID);
 
             this.insideNetwork = true;
@@ -364,12 +364,14 @@ public class Kademlia {
         LinkedList<Node> closestNodes = kBucket.getClosestNodes(keyConverted);
 
         // Send STORE gRPC
+        /*
         Iterator iterator = closestNodes.iterator();
         int i = 0;
         while (iterator.hasNext()) {
             System.out.println("sending store request " + i++);
             sendStoreRequest((Node) iterator.next(), keyConverted, block);
         }
+        //*/
     }
 
     public void storeAuction(Auction auction) {

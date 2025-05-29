@@ -26,7 +26,7 @@ public class Auction {
 
         this.name = name;
         this.basePrice = basePrice;
-        this.countdown = LocalDateTime.now().plusSeconds(300); // 5min countdown (300 secs)
+        this.countdown = LocalDateTime.now().plusSeconds(60); // 5min countdown (300 secs)
         this.active = true;
 
         this.currentBid = basePrice;
